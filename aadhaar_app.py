@@ -9,7 +9,7 @@ from marshmallow import Schema, fields, validate
 
 app = Flask(__name__)
 
-# --- EXPERT CONFIGURATION ---
+# --- EXPERT CONFIGURATION ----
 app.config.update({
     "API_TITLE": "Linking Aadhaar Service",
     "API_VERSION": "v1",
