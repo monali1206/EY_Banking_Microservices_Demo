@@ -1,0 +1,127 @@
+version: '3.8'
+
+services:
+  # --- PERSISTENT DATABASE LAYER ---
+  db:
+    image: postgres:15
+    container_name: bank_retail_db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: securepassword
+      POSTGRES_DB: bank_onboarding_db
+    volumes:
+      # This ensures bank data survives 'docker-compose down'
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d bank_onboarding_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # --- DATABASE MANAGEMENT UI ---
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin_ui
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@bank.com
+      PGADMIN_DEFAULT_PASSWORD: securepassword
+    volumes:
+      # Saves your server connections and UI settings
+      - pgadmin_data:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+
+  # --- KYC SERVICE (5001) ---
+  kyc_service:
+    build: .
+    container_name: kyc_service
+    command: python app.py
+    volumes:
+      - .:/app
+    ports:
+      - "5001:5001"
+    environment:
+      - DATABASE_URL=postgresql://admin:securepassword@db:5432/bank_onboarding_db
+      - JWT_SECRET_KEY=bank-fixed-secret-key
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # --- PAN SERVICE (5002) ---
+  pan_service:
+    build: .
+    container_name: pan_service
+    command: python pan_app.py
+    volumes:
+      - .:/app
+    ports:
+      - "5002:5002"
+    environment:
+      - DATABASE_URL=postgresql://admin:securepassword@db:5432/bank_onboarding_db
+      - JWT_SECRET_KEY=bank-fixed-secret-key
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # --- AADHAAR SERVICE (5003) ---
+  aadhaar_service:
+    build: .
+    container_name: aadhaar_service
+    command: python aadhaar_app.py
+    volumes:
+      - .:/app
+    ports:
+      - "5003:5003"
+    environment:
+      - DATABASE_URL=postgresql://admin:securepassword@db:5432/bank_onboarding_db
+      - JWT_SECRET_KEY=bank-fixed-secret-key
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # --- MONITORING: PROMETHEUS ---
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: bank_prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      # Ensures your historical performance metrics are saved
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+
+  # --- VISUALIZATION: GRAFANA ---
+  grafana:
+    image: grafana/grafana:latest
+    container_name: bank_grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      # Saves your dashboards and data source connections
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+
+  # --- PERFORMANCE TESTING: K6 ---
+  k6:
+    image: grafana/k6:latest
+    container_name: bank_k6
+    volumes:
+      - ./performance_tests:/scripts
+
+# --- VOLUME DEFINITIONS ---
+volumes:
+  postgres_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
