@@ -16,8 +16,8 @@ spec:
     spec:
       containers:
       - name: kyc-container
-        # GitHub Action will update the image below
-        image: ${{ secrets.DOCKER_USERNAME }}/fraud-engine:latest
+        # The workflow will replace 'placeholder' with the real image tag
+        image: placeholder
         command: ["python", "app.py"]
         ports:
         - containerPort: 5001
@@ -57,16 +57,13 @@ spec:
     spec:
       containers:
       - name: pan-container
-        # GitHub Action will update the image below
-        image: ${{ secrets.DOCKER_USERNAME }}/fraud-engine:latest
+        image: placeholder
         command: ["python", "pan_app.py"]
         ports:
         - containerPort: 5002
         env:
         - name: DATABASE_URL
           value: "postgresql://admin:securepassword@db-service:5432/bank_onboarding_db"
-        - name: JWT_SECRET_KEY
-          value: "bank-fixed-secret-key"
 ---
 apiVersion: v1
 kind: Service
@@ -98,16 +95,13 @@ spec:
     spec:
       containers:
       - name: aadhaar-container
-        # GitHub Action will update the image below
-        image: ${{ secrets.DOCKER_USERNAME }}/fraud-engine:latest
+        image: placeholder
         command: ["python", "aadhaar_app.py"]
         ports:
         - containerPort: 5003
         env:
         - name: DATABASE_URL
           value: "postgresql://admin:securepassword@db-service:5432/bank_onboarding_db"
-        - name: JWT_SECRET_KEY
-          value: "bank-fixed-secret-key"
 ---
 apiVersion: v1
 kind: Service
