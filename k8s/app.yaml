@@ -1,0 +1,121 @@
+# --- KYC SERVICE ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kyc-service
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kyc-service
+  template:
+    metadata:
+      labels:
+        app: kyc-service
+    spec:
+      containers:
+      - name: kyc-container
+        # GitHub Action will update the image below
+        image: ${{ secrets.DOCKER_USERNAME }}/fraud-engine:latest
+        command: ["python", "app.py"]
+        ports:
+        - containerPort: 5001
+        env:
+        - name: DATABASE_URL
+          value: "postgresql://admin:securepassword@db-service:5432/bank_onboarding_db"
+        - name: JWT_SECRET_KEY
+          value: "bank-fixed-secret-key"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kyc-service
+spec:
+  selector:
+    app: kyc-service
+  ports:
+  - port: 80
+    targetPort: 5001
+
+---
+# --- PAN SERVICE ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pan-service
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pan-service
+  template:
+    metadata:
+      labels:
+        app: pan-service
+    spec:
+      containers:
+      - name: pan-container
+        # GitHub Action will update the image below
+        image: ${{ secrets.DOCKER_USERNAME }}/fraud-engine:latest
+        command: ["python", "pan_app.py"]
+        ports:
+        - containerPort: 5002
+        env:
+        - name: DATABASE_URL
+          value: "postgresql://admin:securepassword@db-service:5432/bank_onboarding_db"
+        - name: JWT_SECRET_KEY
+          value: "bank-fixed-secret-key"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pan-service
+spec:
+  selector:
+    app: pan-service
+  ports:
+  - port: 80
+    targetPort: 5002
+
+---
+# --- AADHAAR SERVICE ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aadhaar-service
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aadhaar-service
+  template:
+    metadata:
+      labels:
+        app: aadhaar-service
+    spec:
+      containers:
+      - name: aadhaar-container
+        # GitHub Action will update the image below
+        image: ${{ secrets.DOCKER_USERNAME }}/fraud-engine:latest
+        command: ["python", "aadhaar_app.py"]
+        ports:
+        - containerPort: 5003
+        env:
+        - name: DATABASE_URL
+          value: "postgresql://admin:securepassword@db-service:5432/bank_onboarding_db"
+        - name: JWT_SECRET_KEY
+          value: "bank-fixed-secret-key"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: aadhaar-service
+spec:
+  selector:
+    app: aadhaar-service
+  ports:
+  - port: 80
+    targetPort: 5003
