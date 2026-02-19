@@ -3,7 +3,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: kyc-service
-  namespace: default
 spec:
   replicas: 1
   selector:
@@ -16,16 +15,13 @@ spec:
     spec:
       containers:
       - name: kyc-container
-        # The workflow will replace 'placeholder' with the real image tag
-        image: monali1206/banking-kycservice-ey:e359ed4
+        image: monali1206/banking-kycservice-ey
         command: ["python", "app.py"]
         ports:
         - containerPort: 5001
         env:
         - name: DATABASE_URL
           value: "postgresql://admin:securepassword@db-service:5432/bank_onboarding_db"
-        - name: JWT_SECRET_KEY
-          value: "bank-fixed-secret-key"
 ---
 apiVersion: v1
 kind: Service
@@ -44,7 +40,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: pan-service
-  namespace: default
 spec:
   replicas: 1
   selector:
@@ -57,7 +52,7 @@ spec:
     spec:
       containers:
       - name: pan-container
-        image: monali1206/banking-kycservice-ey:e359ed4
+        image: monali1206/banking-kycservice-ey
         command: ["python", "pan_app.py"]
         ports:
         - containerPort: 5002
@@ -82,7 +77,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: aadhaar-service
-  namespace: default
 spec:
   replicas: 1
   selector:
@@ -95,7 +89,7 @@ spec:
     spec:
       containers:
       - name: aadhaar-container
-        image: monali1206/banking-kycservice-ey:e359ed4
+        image: monali1206/banking-kycservice-ey
         command: ["python", "aadhaar_app.py"]
         ports:
         - containerPort: 5003
