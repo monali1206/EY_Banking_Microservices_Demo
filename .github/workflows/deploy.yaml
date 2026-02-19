@@ -26,7 +26,7 @@ jobs:
       run: |
         # Generate a unique tag using the short commit hash
         SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
-        IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/fraud-engine
+        IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/banking-kycservice-ey
         
         # Build the image that contains all three app scripts
         docker build -t $IMAGE_NAME:$SHORT_SHA .
