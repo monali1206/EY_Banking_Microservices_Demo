@@ -17,7 +17,7 @@ spec:
       containers:
       - name: kyc-container
         # The workflow will replace 'placeholder' with the real image tag
-        image: placeholder
+        image: monali1206/banking-kycservice-ey:e359ed4
         command: ["python", "app.py"]
         ports:
         - containerPort: 5001
@@ -57,7 +57,7 @@ spec:
     spec:
       containers:
       - name: pan-container
-        image: placeholder
+        image: monali1206/banking-kycservice-ey:e359ed4
         command: ["python", "pan_app.py"]
         ports:
         - containerPort: 5002
@@ -95,7 +95,7 @@ spec:
     spec:
       containers:
       - name: aadhaar-container
-        image: placeholder
+        image: monali1206/banking-kycservice-ey:e359ed4
         command: ["python", "aadhaar_app.py"]
         ports:
         - containerPort: 5003
