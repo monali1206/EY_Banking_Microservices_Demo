@@ -3,6 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: kyc-service
+  namespace: default
 spec:
   replicas: 1
   selector:
@@ -15,6 +16,7 @@ spec:
     spec:
       containers:
       - name: kyc-container
+        # GitHub Action will update the line below with the specific tag
         image: monali1206/banking-kycservice-ey
         command: ["python", "app.py"]
         ports:
@@ -40,6 +42,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: pan-service
+  namespace: default
 spec:
   replicas: 1
   selector:
@@ -77,6 +80,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: aadhaar-service
+  namespace: default
 spec:
   replicas: 1
   selector:

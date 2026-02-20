@@ -18,16 +18,16 @@ jobs:
     - name: Login to Docker Hub
       uses: docker/login-action@v2
       with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }} # Should be monali1206
+        username: ${{ secrets.DOCKERHUB_USERNAME }} # Ensure this secret is 'monali1206'
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     # 2. Build and Push the Single Shared Image
     - name: Build and Push Image
       run: |
-        # Generate a unique tag
+        # Generate short SHA for versioning
         SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
         
-        # Correctly formatted Image Base
+        # Define clean image names (no double colons)
         IMAGE_BASE="monali1206/banking-kycservice-ey"
         FULL_IMAGE="$IMAGE_BASE:$SHORT_SHA"
         
@@ -36,16 +36,17 @@ jobs:
         docker build -t $FULL_IMAGE .
         docker push $FULL_IMAGE
         
-        # Export variables for the next step
+        # Save variables for the next step
         echo "FULL_IMAGE_NAME=$FULL_IMAGE" >> $GITHUB_ENV
         echo "SHORT_SHA=$SHORT_SHA" >> $GITHUB_ENV
 
     # 3. Update Kubernetes Manifest (GitOps)
     - name: Update Kubernetes Manifest
       run: |
-        # Replaces 'image: monali1206/banking-kycservice-ey' with 'image: monali1206/banking-kycservice-ey:SHA'
+        # Replaces 'image: monali1206/banking-kycservice-ey' with the specific tagged version
         sed -i "s|image: monali1206/banking-kycservice-ey.*|image: ${{ env.FULL_IMAGE_NAME }}|g" k8s/app.yaml
         
+        # Commit changes back to Git
         git config --global user.name 'GitHub Actions'
         git config --global user.email 'actions@github.com'
         git add k8s/app.yaml
